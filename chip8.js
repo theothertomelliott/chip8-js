@@ -12,6 +12,11 @@ class Chip8 {
         this.display_width = 63;
         this.display_height = 31;
         this.display_content = Array.from(Array(this.display_width), () => new Array(this.display_height));
+        for (var i = 0; i < this.display_width; i++) {
+            for (var j = 0; j < this.display_height; j++) {
+                this.display_content[i][j] = false;
+            }
+        }
 
         this.pc = 0x200;
         this.sp = 0;
@@ -415,7 +420,27 @@ class Chip8 {
     // If the sprite is positioned so part of it is outside the coordinates of the display, 
     // it wraps around to the opposite side of the screen. 
     instrD(instruction) {
-        // TODO: Apply sprites
+        let sprite_height = instruction & 0xF;
+        let x = (instruction & 0xF00) >> 8;
+        let y = (instruction & 0xF0) >> 4;
+        let vx = this.register(x);
+        let vy = this.register(y);
+
+        this.registers[0xF] = 0;
+        for (var yline = 0; yline < sprite_height; yline++) {
+            let pos = this.I + yline;
+            let spriteLine = this.mem8(pos);
+            for (var xline = 0; xline < 8; xline++) {
+                let spriteValue = ((spriteLine >> (7 - xline)) & 0x1) != 0;
+                var curValue = this.display_content[xline % this.display_width][yline % this.display_height];
+                if (spriteValue && (spriteValue == curValue)) {
+                    this.display_content[xline % this.display_width][yline % this.display_height] = false;
+                    this.registers[0xF] = 1;
+                } else {
+                    this.display_content[xline % this.display_width][yline % this.display_height] = spriteValue;// spriteValue || curValue;
+                }
+            }
+        }
     }
 
     instrE(instruction) {

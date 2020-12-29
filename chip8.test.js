@@ -21,7 +21,7 @@ test('jp', () => {
     vm.load_rom([0x12, 0x04])
     vm.step()
     expect(vm.program_counter).toBe(0x204);
-})
+});
 
 test('call and ret', () => {
     var vm = new Chip8();
@@ -33,7 +33,7 @@ test('call and ret', () => {
     vm.step();
     vm.step();
     expect(vm.program_counter).toBe(0x202);
-})
+});
 
 test('set register value', () => {
     var vm = new Chip8();
@@ -42,7 +42,7 @@ test('set register value', () => {
     ])
     vm.step();
     expect(vm.register(1)).toBe(0x23);
-})
+});
 
 test('compare register == value', () => {
     // true
@@ -64,7 +64,7 @@ test('compare register == value', () => {
     vm.step();
     vm.step();
     expect(vm.program_counter).toBe(0x204);
-})
+});
 
 test('compare register != value', () => {
     // true
@@ -86,7 +86,7 @@ test('compare register != value', () => {
     vm.step();
     vm.step();
     expect(vm.program_counter).toBe(0x204);
-})
+});
 
 test('compare register == register', () => {
     // true
@@ -112,7 +112,7 @@ test('compare register == register', () => {
     vm.step();
     vm.step();
     expect(vm.program_counter).toBe(0x206);
-})
+});
 
 test('add to register', () => {
     var vm = new Chip8();
@@ -123,7 +123,7 @@ test('add to register', () => {
     vm.step();
     vm.step();
     expect(vm.register(0x1)).toBe(0x05);
-})
+});
 
 test('Set Vx = Vy', () => {
     var vm = new Chip8();
@@ -136,7 +136,7 @@ test('Set Vx = Vy', () => {
     vm.step();
     vm.step();
     expect(vm.register(0x1)).toBe(0x05);
-})
+});
 
 test('Set Vx = Vx OR Vy', () => {
     var vm = new Chip8();
@@ -149,7 +149,7 @@ test('Set Vx = Vx OR Vy', () => {
     vm.step();
     vm.step();
     expect(vm.register(0x1)).toBe(0xFF);
-})
+});
 
 test('Set Vx = Vx AND Vy', () => {
     var vm = new Chip8();
@@ -162,7 +162,7 @@ test('Set Vx = Vx AND Vy', () => {
     vm.step();
     vm.step();
     expect(vm.register(0x1)).toBe(0x0F);
-})
+});
 
 test('Set Vx = Vx XOR Vy', () => {
     var vm = new Chip8();
@@ -175,7 +175,7 @@ test('Set Vx = Vx XOR Vy', () => {
     vm.step();
     vm.step();
     expect(vm.register(0x1)).toBe(0x0F0);
-})
+});
 
 test('Set Vx = Vx + Vy, set VF = carry', () => {
     // with carry
@@ -203,7 +203,7 @@ test('Set Vx = Vx + Vy, set VF = carry', () => {
     vm.step();
     expect(vm.register(0x1)).toBe(0x11);
     expect(vm.register(0xF)).toBe(0x0);
-})
+});
 
 test('Set Vx = Vx - Vy, set VF = NOT borrow', () => {
     // borrow
@@ -231,7 +231,7 @@ test('Set Vx = Vx - Vy, set VF = NOT borrow', () => {
     vm.step();
     expect(vm.register(0x1)).toBe(0x1);
     expect(vm.register(0xF)).toBe(0x1);
-})
+});
 
 test('Set Vx = Vx SHR 1', () => {
     // borrow
@@ -255,7 +255,7 @@ test('Set Vx = Vx SHR 1', () => {
     vm.step();
     expect(vm.register(0x1)).toBe(0x1);
     expect(vm.register(0xF)).toBe(0x0);
-})
+});
 
 test('Set Vx = Vy - Vx, set VF = NOT borrow', () => {
     // borrow
@@ -283,7 +283,7 @@ test('Set Vx = Vy - Vx, set VF = NOT borrow', () => {
     vm.step();
     expect(vm.register(0x1)).toBe(0x1);
     expect(vm.register(0xF)).toBe(0x1);
-})
+});
 
 test('Set Vx = Vx SHL 1', () => {
     // carry
@@ -307,7 +307,7 @@ test('Set Vx = Vx SHL 1', () => {
     vm.step();
     expect(vm.register(0x1)).toBe(0x80);
     expect(vm.register(0xF)).toBe(0x0);
-})
+});
 
 test('SNE Vx, Vy', () => {
     // false
@@ -333,7 +333,7 @@ test('SNE Vx, Vy', () => {
     vm.step();
     vm.step();
     expect(vm.program_counter).toBe(0x208);
-})
+});
 
 test('LD I, addr', () => {
     var vm = new Chip8();
@@ -342,7 +342,7 @@ test('LD I, addr', () => {
     ])
     vm.step();
     expect(vm.I).toBe(0x123);
-})
+});
 
 test('JP V0, addr', () => {
     var vm = new Chip8();
@@ -353,4 +353,37 @@ test('JP V0, addr', () => {
     vm.step();
     vm.step();
     expect(vm.program_counter).toBe(0x134);
-})
+});
+
+test('RND Vx, byte', () => {
+    var vm = new Chip8();
+    vm.load_rom([
+        0xC1, 0x0F,
+    ])
+    vm.step();
+    expect(vm.register(0x1) & 0xF0).toBe(0x0);
+});
+
+test('DRW Vx, Vy, nibble', () => {
+    var vm = new Chip8();
+    vm.load_rom([
+        0xA2, 0x06,
+        0xD1, 0x12,
+        0xD1, 0x12,
+        0xFF, 0xFF, // Sprite
+    ]);
+    vm.step();
+    vm.step(); // Draw first sprite
+    expect(vm.display[0][0]).toBe(true);
+    expect(vm.display[0][1]).toBe(true);
+    expect(vm.display[7][0]).toBe(true);
+    expect(vm.display[7][1]).toBe(true);
+    expect(vm.register(0xF)).toBe(0x0);
+
+    vm.step(); // Draw second sprite, collision!
+    expect(vm.display[0][0]).toBe(false);
+    expect(vm.display[0][1]).toBe(false);
+    expect(vm.display[7][0]).toBe(false);
+    expect(vm.display[7][1]).toBe(false);
+    expect(vm.register(0xF)).toBe(0x1);
+});
