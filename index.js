@@ -2,19 +2,34 @@ import Chip8 from "./chip8.js"
 
 document.getElementById("gobtn").addEventListener("click", loadROMAndStart, false);
 
+for (var i = 0; i <= 0xF; i++) {
+    let id = "key" + i.toString(16).toUpperCase();
+    let b = document.getElementById(id);
+    b.addEventListener("mousedown", () => { pressKey(i); }, false);
+    b.addEventListener("mouseup", () => { releaseKey(i); }, false);
+}
+
 var chip8 = new Chip8();
 var display = document.getElementById("display");
+
+function pressKey(key) {
+    console.log("press");
+    console.log(key);
+    chip8.setKey(key, true);
+}
+
+function releaseKey(key) {
+    console.log("relase");
+    console.log(key);
+    chip8.setKey(key, false);
+}
 
 function loadROMAndStart() {
     var fileInput = document.getElementById("rominput");
 
-    // files is a FileList object (similar to NodeList)
     var files = fileInput.files;
-
-    var file;
-
     for (var i = 0; i < files.length; i++) {
-        file = files[i];
+        let file = files[i];
 
         let reader = new FileReader();
         reader.readAsArrayBuffer(file);
@@ -32,6 +47,7 @@ function loadROMAndStart() {
 }
 
 function runInterpreter() {
+    // Run 9 cycles for approx 500Hz clock speed
     for (var i = 0; i < 9; i++) {
         chip8.step();
     }
@@ -46,5 +62,9 @@ function runInterpreter() {
         text += "\n"
     }
     display.textContent = text;
-    setTimeout(runInterpreter, 10);
+
+    // Decrement at 60Hz
+    chip8.decrement_timers();
+
+    setTimeout(runInterpreter, 1000 / 60);
 }

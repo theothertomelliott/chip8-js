@@ -72,10 +72,6 @@ class Chip8 {
         ])
     }
 
-    input(key) {
-        console.log(key);
-    }
-
     get mem() {
         return this.memory;
     }
@@ -100,6 +96,9 @@ class Chip8 {
 
     setKey(key, value) {
         if (value) {
+            if (this.waiting_for_key) {
+                console.log("Will resume");
+            }
             this.waiting_for_key = false;
         }
         this.keys[key] = value;
@@ -436,8 +435,10 @@ class Chip8 {
             let spriteLine = this.mem8(pos);
             for (var xline = 0; xline < 8; xline++) {
                 let spriteValue = ((spriteLine >> (7 - xline)) & 0x1) != 0;
+
                 let xpos = (vx + xline) % this.display_width;
                 let ypos = (vy + yline) % this.display_height;
+
                 var curValue = this.display_content[xpos][ypos];
                 if (spriteValue && (spriteValue == curValue)) {
                     this.display_content[xpos][ypos] = false;
@@ -488,6 +489,7 @@ class Chip8 {
             // Wait for a key press, store the value of the key in Vx.
             // All execution stops until a key is pressed, then the value of that key is stored in Vx.
             case 0x0A:
+                console.log("Will wait for a keypress");
                 this.waiting_for_key = true;
                 break;
 
