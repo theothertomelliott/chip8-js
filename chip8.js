@@ -11,12 +11,7 @@ class Chip8 {
 
         this.display_width = 63;
         this.display_height = 31;
-        this.display_content = Array.from(Array(this.display_width), () => new Array(this.display_height));
-        for (var i = 0; i < this.display_width; i++) {
-            for (var j = 0; j < this.display_height; j++) {
-                this.display_content[i][j] = false;
-            }
-        }
+        this.clear_display();
 
         this.pc = 0x200;
         this.sp = 0;
@@ -146,6 +141,15 @@ class Chip8 {
         }
     }
 
+    clear_display() {
+        this.display_content = Array.from(Array(this.display_width), () => new Array(this.display_height));
+        for (var i = 0; i < this.display_width; i++) {
+            for (var j = 0; j < this.display_height; j++) {
+                this.display_content[i][j] = false;
+            }
+        }
+    }
+
     step() {
         // Skip execution if waiting for a keypress
         if (this.waiting_for_key) {
@@ -213,7 +217,7 @@ class Chip8 {
         if (instruction == 0x00E0) {
             // 00E0 - CLS
             // Clear the display.
-            this.display_content = Array.from(Array(this.display_width), () => new Array(this.display_height));
+            this.clear_display();
         }
         if (instruction == 0x00EE) {
             // 00EE - RET

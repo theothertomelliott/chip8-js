@@ -367,9 +367,10 @@ test('RND Vx, byte', () => {
 test('DRW Vx, Vy, nibble', () => {
     var vm = new Chip8();
     vm.load_rom([
-        0xA2, 0x06,
-        0xD1, 0x12,
-        0xD1, 0x12,
+        0xA2, 0x08, // LD I 0x208
+        0xD1, 0x12, // DRW V1, V1, 2
+        0xD1, 0x12, // DRW V1, V1, 2
+        0x00, 0xE0, // CLS
         0xFF, 0xFF, // Sprite
     ]);
     vm.step();
@@ -386,4 +387,52 @@ test('DRW Vx, Vy, nibble', () => {
     expect(vm.display[7][0]).toBe(false);
     expect(vm.display[7][1]).toBe(false);
     expect(vm.register(0xF)).toBe(0x1);
+
+    vm.step(); // Clear screen
+    expect(vm.display[0][0]).toBe(false);
+    expect(vm.display[0][1]).toBe(false);
+    expect(vm.display[7][0]).toBe(false);
+    expect(vm.display[7][1]).toBe(false);
+});
+
+test('SKP Vx', () => {
+    var vm = new Chip8();
+    vm.load_rom([
+        0x61, 0x02, // LD V1 0x02
+        0xE1, 0x9E, // SKP V1
+        0x63, 0xFF, // LD V3 0xFF
+        0xE1, 0x9E, // SKP V1
+        0x64, 0xFF, // LD V4 0xFF
+    ]);
+    vm.step();
+    vm.setKey(0x02, true);
+    vm.step();
+    vm.setKey(0x02, false);
+    vm.step();
+    vm.step();
+    vm.step();
+
+    expect(vm.register(0x3)).toBe(0x00);
+    expect(vm.register(0x4)).toBe(0xFF);
+});
+
+test('SKNP Vx', () => {
+    var vm = new Chip8();
+    vm.load_rom([
+        0x61, 0x02, // LD V1 0x02
+        0xE1, 0xA1, // SKNP V1
+        0x63, 0xFF, // LD V3 0xFF
+        0xE1, 0xA1, // SKNP Vx
+        0x64, 0xFF, // LD V4 0xFF
+    ]);
+    vm.step();
+    vm.setKey(0x02, true);
+    vm.step();
+    vm.setKey(0x02, false);
+    vm.step();
+    vm.step();
+    vm.step();
+
+    expect(vm.register(0x3)).toBe(0xFF);
+    expect(vm.register(0x4)).toBe(0x00);
 });
