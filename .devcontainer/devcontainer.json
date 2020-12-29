@@ -17,8 +17,7 @@
 	"extensions": [
 		"dbaeumer.vscode-eslint",
 		"ms-azuretools.vscode-docker",
-		"Orta.vscode-jest",
-		"ryanluker.vscode-coverage-gutters"
+		"Orta.vscode-jest"
 	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [
