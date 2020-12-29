@@ -436,12 +436,14 @@ class Chip8 {
             let spriteLine = this.mem8(pos);
             for (var xline = 0; xline < 8; xline++) {
                 let spriteValue = ((spriteLine >> (7 - xline)) & 0x1) != 0;
-                var curValue = this.display_content[xline % this.display_width][yline % this.display_height];
+                let xpos = (vx + xline) % this.display_width;
+                let ypos = (vy + yline) % this.display_height;
+                var curValue = this.display_content[xpos][ypos];
                 if (spriteValue && (spriteValue == curValue)) {
-                    this.display_content[xline % this.display_width][yline % this.display_height] = false;
+                    this.display_content[xpos][ypos] = false;
                     this.registers[0xF] = 1;
                 } else {
-                    this.display_content[xline % this.display_width][yline % this.display_height] = spriteValue;// spriteValue || curValue;
+                    this.display_content[xpos][ypos] = spriteValue || curValue;
                 }
             }
         }
@@ -524,8 +526,8 @@ class Chip8 {
             // the tens digit at location I+1, and the ones digit at location I+2.
             case 0x33:
                 let i = this.I;
-                let hundreds = Math.Trunc(vx / 100);
-                let tens = Math.Trunc((vx % 100) / 10);
+                let hundreds = Math.trunc(vx / 100);
+                let tens = Math.trunc((vx % 100) / 10);
                 let units = vx % 10;
                 this.memory[i] = hundreds;
                 this.memory[i + 1] = tens;
@@ -536,7 +538,7 @@ class Chip8 {
             // Store registers V0 through Vx in memory starting at location I.
             // The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
             case 0x55:
-                for (c = 0; c < x; c++) {
+                for (var c = 0; c < x; c++) {
                     this.memory[this.I + c] = this.register(c);
                 }
                 break;
