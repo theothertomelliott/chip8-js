@@ -9,8 +9,10 @@ for (var i = 0; i <= 0xF; i++) {
     b.addEventListener("mouseup", () => { releaseKey(i); }, false);
 }
 
+var c = document.getElementById("displayCanvas");
+var display_ctx = c.getContext("2d");
+
 var chip8 = new Chip8();
-var display = document.getElementById("display");
 
 function pressKey(key) {
     console.log("press");
@@ -35,6 +37,7 @@ function loadROMAndStart() {
         reader.readAsArrayBuffer(file);
 
         reader.onload = function () {
+            chip8 = new Chip8();
             let data = new Uint8Array(reader.result);
             chip8.load_rom(data);
             runInterpreter();
@@ -54,14 +57,16 @@ function runInterpreter() {
 
     // Draw frame
     let content = chip8.display;
-    var text = "";
-    for (var j = 0; j < 31; j++) {
-        for (var i = 0; i < 63; i++) {
-            text += content[i][j] ? "X" : " ";
+    for (var j = 0; j < 32; j++) {
+        for (var i = 0; i < 64; i++) {
+            if (content[i][j]) {
+                display_ctx.fillStyle = 'black';
+            } else {
+                display_ctx.fillStyle = 'white';
+            }
+            display_ctx.fillRect(i * 10, j * 10, 10, 10);
         }
-        text += "\n"
     }
-    display.textContent = text;
 
     // Decrement at 60Hz
     chip8.decrement_timers();

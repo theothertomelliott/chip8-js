@@ -436,3 +436,19 @@ test('SKNP Vx', () => {
     expect(vm.register(0x3)).toBe(0xFF);
     expect(vm.register(0x4)).toBe(0x00);
 });
+
+test('LD DT, Vx,; decrement timers; LD Vx, DT', () => {
+    var vm = new Chip8();
+    vm.load_rom([
+        0x61, 0xF0, // LD V1 0xF0 (ensure this value is overwritten)
+        0x61, 0x02, // LD V1 0x02
+        0xF1, 0x15, // LD DT, V1
+        0xF2, 0x07, // LD V1, DT
+    ]);
+    vm.step();
+    vm.step();
+    vm.step();
+    vm.decrement_timers();
+    vm.step();
+    expect(vm.register(0x2)).toBe(0x01);
+})
