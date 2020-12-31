@@ -13,6 +13,8 @@ var c = document.getElementById("displayCanvas");
 var display_ctx = c.getContext("2d");
 
 var chip8 = new Chip8();
+var running = false;
+runInterpreter();
 
 function pressKey(key) {
     console.log("press");
@@ -27,6 +29,9 @@ function releaseKey(key) {
 }
 
 function loadROMAndStart() {
+    // If running, stop
+    running = false;
+
     var fileInput = document.getElementById("rominput");
 
     var files = fileInput.files;
@@ -40,7 +45,7 @@ function loadROMAndStart() {
             chip8 = new Chip8();
             let data = new Uint8Array(reader.result);
             chip8.load_rom(data);
-            runInterpreter();
+            running = true;
         };
 
         reader.onerror = function () {
@@ -50,6 +55,11 @@ function loadROMAndStart() {
 }
 
 function runInterpreter() {
+    if (!running) {
+        setTimeout(runInterpreter, 1000 / 60);
+        return;
+    }
+
     // Run 9 cycles for approx 500Hz clock speed
     for (var i = 0; i < 9; i++) {
         chip8.step();
