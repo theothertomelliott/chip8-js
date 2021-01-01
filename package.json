@@ -4,6 +4,11 @@
   "main": "index.js",
   "type": "module",
   "license": "MIT",
+  "description": "A Chip8 Emulator",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/theothertomelliott/chip8-js.git"
+  },
   "scripts": {
     "dev": "parcel index.html --open",
     "build": "parcel build index.html",
