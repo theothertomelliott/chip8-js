@@ -77,6 +77,8 @@ function loadROMAndStart() {
     }
 }
 
+var decompile = {}
+
 function runInterpreter() {
     if (!running) {
         setTimeout(runInterpreter, 100);
@@ -88,7 +90,7 @@ function runInterpreter() {
         let pc = chip8.program_counter;
         let result = chip8.step();
         if (result) {
-            console.log("0x%s: %s", pc.toString(16), result);
+            decompile[`0x${pc.toString(16)}`] = result;
         }
     }
 
@@ -107,6 +109,12 @@ function runInterpreter() {
 
     // Decrement at 60Hz
     chip8.decrement_timers();
+
+    var decompilation = "";
+    Object.keys(decompile).sort().reduce(function (result, key) {
+        decompilation += `${key}: ${decompile[key]}\n`
+    }, {});
+    document.getElementById("decompile").textContent = decompilation;
 
     setTimeout(runInterpreter, 1000 / 60);
 }
