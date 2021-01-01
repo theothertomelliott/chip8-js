@@ -85,7 +85,11 @@ function runInterpreter() {
 
     // Run 9 cycles for approx 500Hz clock speed
     for (var i = 0; i < 9; i++) {
-        chip8.step();
+        let pc = chip8.program_counter;
+        let result = chip8.step();
+        if (result) {
+            console.log("0x%s: %s", pc.toString(16), result);
+        }
     }
 
     // Draw frame

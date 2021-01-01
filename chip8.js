@@ -154,7 +154,7 @@ class Chip8 {
     step() {
         // Skip execution if waiting for a keypress
         if (this.waiting_for_key) {
-            return;
+            return false;
         }
 
         // Load instruction
@@ -164,53 +164,37 @@ class Chip8 {
         // Execute instruction
         switch (instruction & 0xF000) {
             case 0x0000:
-                this.instr0(instruction);
-                break;
+                return this.instr0(instruction);
             case 0x1000:
-                this.instr1(instruction);
-                break;
+                return this.instr1(instruction);
             case 0x2000:
-                this.instr2(instruction);
-                break;
+                return this.instr2(instruction);
             case 0x3000:
-                this.instr3(instruction);
-                break;
+                return this.instr3(instruction);
             case 0x4000:
-                this.instr4(instruction);
-                break;
+                return this.instr4(instruction);
             case 0x5000:
-                this.instr5(instruction);
-                break;
+                return this.instr5(instruction);
             case 0x6000:
-                this.instr6(instruction);
-                break;
+                return this.instr6(instruction);
             case 0x7000:
-                this.instr7(instruction);
-                break;
+                return this.instr7(instruction);
             case 0x8000:
-                this.instr8(instruction);
-                break;
+                return this.instr8(instruction);
             case 0x9000:
-                this.instr9(instruction);
-                break;
+                return this.instr9(instruction);
             case 0xA000:
-                this.instrA(instruction);
-                break;
+                return this.instrA(instruction);
             case 0xB000:
-                this.instrB(instruction);
-                break;
+                return this.instrB(instruction);
             case 0xC000:
-                this.instrC(instruction);
-                break;
+                return this.instrC(instruction);
             case 0xD000:
-                this.instrD(instruction);
-                break;
+                return this.instrD(instruction);
             case 0xE000:
-                this.instrE(instruction);
-                break;
+                return this.instrE(instruction);
             case 0xF000:
-                this.instrF(instruction);
-                break;
+                return this.instrF(instruction);
         }
     }
 
@@ -218,17 +202,17 @@ class Chip8 {
         if (instruction == 0x00E0) {
             // 00E0 - CLS
             // Clear the display.
-            console.log("CLS");
             this.clear_display();
+            return `CLS`;
         }
         if (instruction == 0x00EE) {
             // 00EE - RET
             // Return from a subroutine.
 
             // The interpreter sets the program counter to the address at the top of the stack, then subtracts 1 from the stack pointer.
-            console.log("RET");
             this.pc = this.stack[this.sp];
             this.sp--;
+            return `RET`;
         }
     }
 
@@ -237,8 +221,8 @@ class Chip8 {
     // The interpreter sets the program counter to nnn.
     instr1(instruction) {
         let addr = instruction & 0xFFF;
-        console.log("JP 0x%s", addr.toString(16));
         this.pc = addr;
+        return `JP 0x${addr.toString(16)}`;
     }
 
     // 2nnn - CALL addr
@@ -247,10 +231,10 @@ class Chip8 {
     // then puts the current PC on the top of the stack. The PC is then set to nnn.
     instr2(instruction) {
         let addr = instruction & 0xFFF;
-        console.log("CALL 0x%s", addr.toString(16));
         this.sp++;
         this.stack[this.sp] = this.pc;
         this.pc = addr;
+        return `CALL 0x${addr.toString(16)}`;
     }
 
     // 3xkk - SE Vx, byte
@@ -260,10 +244,10 @@ class Chip8 {
     instr3(instruction) {
         let value = instruction & 0xFF;
         let register = (instruction & 0xF00) >> 8;
-        console.log("SE V%s, 0x%s", register.toString(16), value.toString(16));
         if (this.register(register) == value) {
             this.pc += 2;
         }
+        return `SE V${register.toString(16)}, 0x${value.toString(16)}`;
     }
 
     // 4xkk - SNE Vx, byte
@@ -272,10 +256,10 @@ class Chip8 {
     instr4(instruction) {
         let value = instruction & 0xFF;
         let register = (instruction & 0xF00) >> 8;
-        console.log("SNE V%s, 0x%s", register.toString(16), value.toString(16));
         if (this.register(register) != value) {
             this.pc += 2;
         }
+        return `SNE V${register.toString(16)}, 0x${value.toString(16)}`;
     }
 
     // 5xy0 - SE Vx, Vy
@@ -284,10 +268,10 @@ class Chip8 {
     instr5(instruction) {
         let register1 = (instruction & 0xF00) >> 8;
         let register2 = (instruction & 0xF0) >> 4;
-        console.log("SE V%s, V%s", register1.toString(16), register2.toString(16));
         if (this.register(register1) == this.register(register2)) {
             this.pc += 2;
         }
+        return `SE V${register1.toString(16)}, V${register2.toString(16)}`;
     }
 
     // 6xkk - LD Vx, byte
@@ -296,8 +280,8 @@ class Chip8 {
     instr6(instruction) {
         let value = instruction & 0xFF;
         let register = (instruction & 0xF00) >> 8;
-        console.log("LD V%s, 0x%s", register.toString(16), value.toString(16));
         this.registers[register] = value;
+        return `LD V${register.toString(16)}, 0x${value.toString(16)}`;
     }
 
     // 7xkk - ADD Vx, byte
@@ -306,8 +290,8 @@ class Chip8 {
     instr7(instruction) {
         let value = instruction & 0xFF;
         let register = (instruction & 0xF00) >> 8;
-        console.log("ADD V%s, 0x%s", register.toString(16), value.toString(16));
         this.registers[register] = this.register(register) + value;
+        return `ADD V${register.toString(16)}, 0x${value.toString(16)}`;
     }
 
     instr8(instruction) {
@@ -321,80 +305,71 @@ class Chip8 {
             // Set Vx = Vy.
             // Stores the value of register Vy in register Vx.
             case 0x0:
-                console.log("LD V%s, V%s", x.toString(16), y.toString(16));
                 this.registers[x] = this.register(y);
-                break;
+                return `LD V${x.toString(16)}, V${y.toString(16)}`;
 
             // 8xy1 - OR Vx, Vy
             // Set Vx = Vx OR Vy.
             // Performs a bitwise OR on the values of Vx and Vy, then stores the result in Vx. A bitwise OR compares the corrseponding bits from two values, and if either bit is 1, then the same bit in the result is also 1. Otherwise, it is 0.
             case 0x1:
-                console.log("OR V%s, V%s", x.toString(16), y.toString(16));
                 this.registers[x] = this.register(x) | this.register(y);
-                break;
+                return `OR V${x.toString(16)}, V${y.toString(16)}`;
 
             // 8xy2 - AND Vx, Vy
             // Set Vx = Vx AND Vy.
             // Performs a bitwise AND on the values of Vx and Vy, then stores the result in Vx. A bitwise AND compares the corrseponding bits from two values, and if both bits are 1, then the same bit in the result is also 1. Otherwise, it is 0.
             case 0x2:
-                console.log("AND V%s, V%s", x.toString(16), y.toString(16));
                 this.registers[x] = this.register(x) & this.register(y);
-                break;
+                return `AND V${x.toString(16)}, V${y.toString(16)}`;
 
             // 8xy3 - XOR Vx, Vy
             // Set Vx = Vx XOR Vy.
             // Performs a bitwise exclusive OR on the values of Vx and Vy, then stores the result in Vx. An exclusive OR compares the corrseponding bits from two values, and if the bits are not both the same, then the corresponding bit in the result is set to 1. Otherwise, it is 0.
             case 0x3:
-                console.log("XOR V%s, V%s", x.toString(16), y.toString(16));
                 this.registers[x] = this.register(x) ^ this.register(y);
-                break;
+                return `XOR V${x.toString(16)}, V${y.toString(16)}`;
 
             // 8xy4 - ADD Vx, Vy
             // Set Vx = Vx + Vy, set VF = carry.
             // The values of Vx and Vy are added together. If the result is greater than 8 bits (i.e., > 255,) VF is set to 1, otherwise 0. Only the lowest 8 bits of the result are kept, and stored in Vx.
             case 0x4:
-                console.log("ADD V%s, V%s", x.toString(16), y.toString(16));
                 let value = this.register(x) + this.register(y);
                 this.registers[0xF] = value > 255 ? 1 : 0;
                 this.registers[x] = value & 0xFF;
-                break;
+                return `ADD V${x.toString(16)}, V${y.toString(16)}`;
 
             // 8xy5 - SUB Vx, Vy
             // Set Vx = Vx - Vy, set VF = NOT borrow.
             // If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
             case 0x5:
-                console.log("SUB V%s, V%s", x.toString(16), y.toString(16));
                 this.registers[0xF] = vx > vy ? 1 : 0;
                 this.registers[x] = vx - vy;
-                break;
+                return `SUB V${x.toString(16)}, V${y.toString(16)}`;
 
             // 8xy6 - SHR Vx {, Vy}
             // Set Vx = Vx SHR 1.
             // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
             case 0x6:
-                console.log("SHR V%s {, V%s}", x.toString(16), y.toString(16));
                 this.registers[0xF] = (vx & 0x1) == 1 ? 1 : 0;
                 this.registers[x] = vx >> 1;
-                break;
+                return `SHR V${x.toString(16)} {, V${y.toString(16)}}`;
 
             // 8xy7 - SUBN Vx, Vy
             // Set Vx = Vy - Vx, set VF = NOT borrow.
             // If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
             case 0x7:
-                console.log("SUBN V%s, V%s", x.toString(16), y.toString(16));
                 this.registers[0xF] = vy > vx ? 1 : 0;
                 this.registers[x] = vy - vx;
-                break;
+                return `SUBN V${x.toString(16)}, V${y.toString(16)}`;
 
             // 8xyE - SHL Vx {, Vy}
             // Set Vx = Vx SHL 1.
             // If the most-significant bit of Vx is 1, then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
             case 0xE:
-                console.log("SHL V%s {, V%s}", x.toString(16), y.toString(16));
                 let shifted = vx << 1;
                 this.registers[0xF] = shifted > 0xFF ? 1 : 0;
                 this.registers[x] = shifted & 0xFF;
-                break;
+                return `SHL V${x.toString(16)} {, V${y.toString(16)}}`;
         }
     }
 
@@ -405,13 +380,14 @@ class Chip8 {
     instr9(instruction) {
         let x = (instruction & 0xF00) >> 8;
         let y = (instruction & 0xF0) >> 4;
-        console.log("SNE V%s, V%s", x.toString(16), y.toString(16));
         let vx = this.register(x);
         let vy = this.register(y);
 
         if (vx != vy) {
             this.pc += 2
         }
+
+        return `SNE V${x.toString(16)}, V${y.toString(16)}`;
     }
 
     // Annn - LD I, addr
@@ -419,8 +395,8 @@ class Chip8 {
     // The value of register I is set to nnn.
     instrA(instruction) {
         let addr = instruction & 0xFFF;
-        console.log("LD I, 0x%s", addr.toString(16));
         this.registerI = addr;
+        return `LD I, 0x${addr.toString(16)}`;
     }
 
     // Bnnn - JP V0, addr
@@ -428,8 +404,8 @@ class Chip8 {
     // The program counter is set to nnn plus the value of V0.
     instrB(instruction) {
         let addr = instruction & 0xFFF;
-        console.log("LD I, 0x%s", addr.toString(16));
         this.pc = this.register(0x0) + (addr);
+        return `LD I, 0x${addr.toString(16)}`;
     }
 
     // Cxkk - RND Vx, byte
@@ -438,8 +414,8 @@ class Chip8 {
     instrC(instruction) {
         let register = (instruction & 0xF00) >> 8;
         let kk = instruction & 0xFF;
-        console.log("RND V%s, 0x%s", register.toString(16), kk.toString(16));
         this.registers[register] = (Math.random() * 255) & kk;
+        return `RND V${register.toString(16)}, 0x${kk.toString(16)}`;
     }
 
     // Dxyn - DRW Vx, Vy, nibble
@@ -456,9 +432,6 @@ class Chip8 {
         let y = (instruction & 0xF0) >> 4;
         let vx = this.register(x);
         let vy = this.register(y);
-
-        console.log("DRW V%d, V%d, %d", x, y, sprite_height);
-        console.log("Drawing a %d high sprite to (%d,%d)", sprite_height, vx, vy)
 
         this.registers[0xF] = 0;
         for (var yline = 0; yline < sprite_height; yline++) {
@@ -479,6 +452,8 @@ class Chip8 {
                 }
             }
         }
+
+        return `DRW V${x}, V${y}, ${sprite_height}`;
     }
 
     instrE(instruction) {
@@ -490,21 +465,19 @@ class Chip8 {
             // Checks the keyboard, and if the key corresponding to the value of Vx is currently in the down position, 
             // PC is increased by 2.
             case 0x9E:
-                console.log("SKP V%s", x.toString(16));
                 if (this.keys[vx]) {
                     this.pc += 2;
                 }
-                break;
+                return `SKP V${x.toString(16)}`;
 
             // ExA1 - SKNP Vx
             // Skip next instruction if key with the value of Vx is not pressed.
             // Checks the keyboard, and if the key corresponding to the value of Vx is currently in the up position, PC is increased by 2.
             case 0xA1:
-                console.log("SKNP V%s", x.toString(16));
                 if (!this.keys[vx]) {
                     this.pc += 2;
                 }
-                break;
+                return `SKNP V${x.toString(16)}`;
         }
     }
 
@@ -516,50 +489,44 @@ class Chip8 {
             // Set Vx = delay timer value.
             // The value of DT is placed into Vx.
             case 0x07:
-                console.log("LD V%s DT", x.toString(16));
                 this.registers[x] = this.delay_timer;
-                break;
+                return `LD V${x.toString(16)} DT`;
 
             // Fx0A - LD Vx, K
             // Wait for a key press, store the value of the key in Vx.
             // All execution stops until a key is pressed, then the value of that key is stored in Vx.
             case 0x0A:
-                console.log("LD V%s, K", x.toString(16));
                 this.waiting_for_key = true;
                 this.store_key_in = x;
-                break;
+                return `LD V${x.toString(16)}`;
 
             // Fx15 - LD DT, Vx
             // Set delay timer = Vx.
             // DT is set equal to the value of Vx.
             case 0x15:
-                console.log("LD DT, V%s", x.toString(16));
                 this.delay_timer = vx;
-                break;
+                return `LD DT, V${x.toString(16)}`;
 
             // Fx18 - LD ST, Vx
             // Set sound timer = Vx.
             // ST is set equal to the value of Vx.
             case 0x18:
-                console.log("LD ST, V%s", x.toString(16));
                 this.sound_timer = vx;
-                break;
+                return `LD ST, V${x.toString(16)}`;
 
             // Fx1E - ADD I, Vx
             // Set I = I + Vx.
             // The values of I and Vx are added, and the results are stored in I.
             case 0x1E:
-                console.log("ADD I, V%s", x.toString(16));
                 this.registerI = this.I + vx;
-                break;
+                return `ADD I, V${x.toString(16)}`;
 
             // Fx29 - LD F, Vx
             // Set I = location of sprite for digit Vx.
             // The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx. 
             case 0x29:
-                console.log("LD F, V%s", x.toString(16));
                 this.registerI = 5 * vx
-                break;
+                return `LD F, V${x.toString(16)}`;
 
             // Fx33 - LD B, Vx
             // Store BCD representation of Vx in memory locations I, I+1, and I+2.
@@ -567,7 +534,6 @@ class Chip8 {
             // and places the hundreds digit in memory at location in I, 
             // the tens digit at location I+1, and the ones digit at location I+2.
             case 0x33:
-                console.log("LD B, V%s", x.toString(16));
                 let i = this.I;
                 let hundreds = Math.trunc(vx / 100);
                 let tens = Math.trunc((vx % 100) / 10);
@@ -575,27 +541,25 @@ class Chip8 {
                 this.memory[i] = hundreds;
                 this.memory[i + 1] = tens;
                 this.memory[i + 2] = units;
-                break;
+                return `LD B, V${x.toString(16)}`;
 
             // Fx55 - LD [I], Vx
             // Store registers V0 through Vx in memory starting at location I.
             // The interpreter copies the values of registers V0 through Vx into memory, starting at the address in I.
             case 0x55:
-                console.log("LD [I], V%s", x.toString(16));
                 for (var c = 0; c < x; c++) {
                     this.memory[this.I + c] = this.register(c);
                 }
-                break;
+                return `LD [I], V${x.toString(16)}`;
 
             // Fx65 - LD Vx, [I]
             // Read registers V0 through Vx from memory starting at location I.
             // The interpreter reads values from memory starting at location I into registers V0 through Vx.
             case 0x65:
-                console.log("LD V%s, [I]", x.toString(16));
                 for (c = 0; c < x; c++) {
                     this.registers[c] = this.mem8(this.I + c);
                 }
-                break;
+                return `LD V${x.toString(16)}, [I]`;
         }
     }
 }
