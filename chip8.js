@@ -19,6 +19,7 @@ class Chip8 {
         this.keys = {};
 
         this.waiting_for_key = false;
+        this.store_key_in = 0x0;
 
         // Load character sprites into memory
         this.load_memory(0x0000, [
@@ -97,7 +98,8 @@ class Chip8 {
     setKey(key, value) {
         if (value) {
             if (this.waiting_for_key) {
-                console.log("Will resume");
+                console.log("Will resume with key 0x%s", key.toString(16));
+                this.registers[this.store_key_in] = key;
             }
             this.waiting_for_key = false;
         }
@@ -524,6 +526,7 @@ class Chip8 {
             case 0x0A:
                 console.log("LD V%s, K", x.toString(16));
                 this.waiting_for_key = true;
+                this.store_key_in = x;
                 break;
 
             // Fx15 - LD DT, Vx
