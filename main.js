@@ -51,7 +51,6 @@ class Run extends React.Component {
 
         this.state = {
             chip8: chip8,
-            display: chip8.display,
             running: true,
             decompile: {},
         };
@@ -85,7 +84,7 @@ class Run extends React.Component {
             let pc = chip8.program_counter;
             let result = chip8.step();
             if (result) {
-                decompile[`0x${pc.toString(16)}`] = result;
+                decompile[pc] = result;
             }
         }
 
@@ -93,7 +92,6 @@ class Run extends React.Component {
         chip8.decrement_timers();
 
         this.setState({
-            display: chip8.display,
             decompile: decompile,
         });
     }
@@ -107,16 +105,16 @@ class Run extends React.Component {
     }
 
     render() {
-        var decompilation = "";
-        let decompile = this.state.decompile;
-        Object.keys(decompile).sort().reduce(function (result, key) {
-            decompilation += `${key}: ${decompile[key]}\n`
-        }, {});
-
         return <div>
-            <Display content={this.state.display} />
-            <Keypad keyDown={this.handleKeyDown} keyUp={this.handleKeyUp} />
-            <Decompile text={decompilation} />
+            <Display content={this.state.chip8.display} />
+            <Keypad
+                keyDown={this.handleKeyDown}
+                keyUp={this.handleKeyUp}
+            />
+            <Decompile
+                content={this.state.decompile}
+                pc={this.state.chip8.program_counter}
+            />
         </div>;
     }
 }
@@ -153,7 +151,18 @@ class Keypad extends React.Component {
 
 class Decompile extends React.Component {
     render() {
-        return <pre>{this.props.text}</pre>;
+        let decompile = this.props.content;
+        let pc = this.props.pc;
+        var items = [];
+        Object.keys(decompile).sort().reduce(function (result, key) {
+            if (key == pc) {
+                items.push(<li key={key}><strong>0x{key.toString(16)}: {decompile[key]}</strong></li>);
+            } else {
+                items.push(<li key={key}>0x{key.toString(16)}: {decompile[key]}</li>);
+            }
+        }, {});
+
+        return <ul>{items}</ul>;
     }
 }
 
