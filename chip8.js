@@ -135,7 +135,9 @@ class Chip8 {
     decrement_timers() {
         if (this.sound_timer > 0) {
             this.sound_timer--;
-            console.log("BEEP");
+            if (this.sound_timer == 0) {
+                console.log("BEEP");
+            }
         }
         if (this.delay_timer > 0) {
             this.delay_timer--;
